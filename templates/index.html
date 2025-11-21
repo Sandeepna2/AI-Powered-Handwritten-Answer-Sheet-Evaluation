@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>📘 Bluebook Corrector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #eef2f7;
+            margin: 0;
+            padding: 0;
+        }
+        .main-container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #2b2f80;
+            font-size: 32px;
+        }
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+        }
+        input[type="file"] {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #4f46e5;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #3730a3;
+        }
+    </style>
+</head>
+<body>
+
+{% include 'navbar.html' %}
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+        <strong>Bluebook Evaluator</strong><br>
+        <small>Logged in as: {{ session.email }}</small>
+    </div>
+    <div>
+        {% if session.is_admin %}
+            <a href="/admin">Admin Panel</a> |
+        {% endif %}
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+    <div class="main-container">
+        <div class="header">
+            <h1>📘 Bluebook Answer Sheet Evaluator</h1>
+            <p>Upload a Knowledge Base PDF and Answer Sheet (PDF/Images) to evaluate answers automatically.</p>
+        </div>
+
+        <div class="form-section">
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <label for="knowledge_base">📚 Knowledge Base (PDF)</label>
+                <input type="file" name="knowledge_base" accept="application/pdf" required>
+
+                <label for="answer_sheet">📝 Answer Sheet (PDF or Images)</label>
+                <input type="file" name="answer_sheet" multiple accept="application/pdf, image/png, image/jpeg" required>
+
+                <button type="submit">🚀 Evaluate</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

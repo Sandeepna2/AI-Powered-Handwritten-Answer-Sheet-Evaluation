@@ -1,0 +1,32 @@
+<div class="navbar" 
+     style="background:white;
+            padding:15px 30px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.1);
+            font-family:'Inter',sans-serif;
+            position:sticky;
+            top:0;
+            z-index:100;">
+    
+    <div style="font-size:20px;font-weight:700;color:#4f46e5;">
+        Bluebook Corrector
+    </div>
+
+    <div style="display:flex;gap:20px;font-weight:600;">
+        <a href="/" style="text-decoration:none;color:#4f46e5;">Home</a>
+
+        {% if session.get('user_id') %}
+            <a href="/dashboard" style="text-decoration:none;color:#4f46e5;">Dashboard</a>
+            <a href="/logout" style="text-decoration:none;color:#ef4444;">Logout</a>
+        {% else %}
+            <a href="/login" style="text-decoration:none;color:#4f46e5;">Login</a>
+            <a href="/signup" style="text-decoration:none;color:#4f46e5;">Signup</a>
+        {% endif %}
+
+        {% if session.get('is_admin') %}
+            <a href="/admin" style="text-decoration:none;color:#4f46e5;">Admin</a>
+        {% endif %}
+    </div>
+</div>
