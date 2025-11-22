@@ -133,7 +133,7 @@
 <div class="grid">
     <!-- Top Left: KB PDF -->
     <div class="panel">
-        <h2>📚 Knowledge Base</h2>
+        <h2>📚Question Paper </h2>
         {% if kb_path %}
             <iframe src="{{ url_for('static', filename=kb_path) }}"></iframe>
         {% else %}
@@ -179,8 +179,9 @@
 <div class="panel">
     <h2>🧾 Professional Evaluation</h2>
     <div class="evaluation-marks">
-        <strong>Total Marks:</strong> {{ marks }} / {{ total_marks }}<br>
-        <strong>Question:</strong> {{ question }}
+        <strong>Total Marks:</strong> {{ marks }} <br>
+        <!-- <strong>Total Marks:</strong> {{ marks }} / {{ total_marks }}<br> -->
+        <!-- <strong>Question:</strong> {{ question }} -->
     </div>
     <pre>{{ evaluation }}</pre>
 </div>
