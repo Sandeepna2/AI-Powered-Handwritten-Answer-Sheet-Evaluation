@@ -1,7 +1,7 @@
 ﻿# AI-Powered Handwritten Answer Sheet Evaluation
 ## Bluebook Corrector – Automated Exam Assessment Using OCR, NLP, and LLMs 
 
----
+
 
 ## Overview
 Bluebook Corrector is an AI-powered system designed to automatically evaluate handwritten examination answer sheets.
@@ -171,5 +171,6 @@ Results appear in `evaluate.html`.
 B.E. Computer Science and Engineering  
 CMR Institute of Technology  
 Aspiring Software Developer | AI & Web Technologies
+
 
 
