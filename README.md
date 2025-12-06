@@ -165,11 +165,11 @@ Results appear in `evaluate.html`.
 ---
 
 
----
 
 ## Author
 **Sandeep N A**  
 B.E. Computer Science and Engineering  
 CMR Institute of Technology  
 Aspiring Software Developer | AI & Web Technologies
+
 
