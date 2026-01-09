@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% set hide_nav = True %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <!-- Floating Navbar Links in Card or just pure auth? Let's add a small link back home -->
+        <div class="d-flex justify-content-between mb-4">
+            <a href="{{ url_for('main.welcome') }}" class="text-decoration-none fw-bold"
+                style="color: #6a11cb;">Bluebook Corrector</a>
+        </div>
+
+        <h2 class="auth-title">Welcome Back 👋</h2>
+        <p class="text-muted mb-4">Login to access Bluebook Evaluator</p>
+
+        <form method="POST">
+            <div class="mb-3 text-start">
+                <input type="email" class="form-control form-control-lg" name="email" placeholder="Email address"
+                    required>
+            </div>
+            <div class="mb-4 text-start">
+                <input type="password" class="form-control form-control-lg" name="password" placeholder="Password"
+                    required>
+            </div>
+            <button type="submit" class="btn btn-primary-custom">Login</button>
+        </form>
+
+        <div class="mt-4">
+            <p class="text-muted">Don't have an account? <a href="{{ url_for('auth.signup') }}"
+                    style="color: #2575fc; font-weight: 600;">Sign up</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

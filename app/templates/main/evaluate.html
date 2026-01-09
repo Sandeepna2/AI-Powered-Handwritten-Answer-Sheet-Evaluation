@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid eval-container">
+
+    <div class="d-flex align-items-center mb-4">
+        <h2 class="fw-bold me-2">📊 Evaluation Dashboard</h2>
+    </div>
+
+    <div class="row h-100">
+        <!-- Extracted Text Column -->
+        <div class="col-md-6 mb-4">
+            <div class="result-card">
+                <div class="card-header-custom">
+                    🧠 Extracted Text from Answer Sheet
+                </div>
+                <div class="card-body-custom">
+                    {% if extracted_text %}
+                    <div class="extracted-text-box">
+                        {{ extracted_text }}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No text extracted.</p>
+                    {% endif %}
+
+                    {% if preview_images %}
+                    <div class="mt-4">
+                        <strong>Preview:</strong><br>
+                        {% for img_b64 in preview_images[:2] %}
+                        <img src="data:image/jpeg;base64,{{ img_b64 }}" class="img-fluid border rounded mt-2"
+                            style="max-height: 200px;">
+                        {% endfor %}
+                        {% if preview_images|length > 2 %}
+                        <p class="text-muted mt-2">+ {{ preview_images|length - 2 }} more pages...</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluation Result Column -->
+        <div class="col-md-6 mb-4">
+            <div class="result-card">
+                <div class="card-header-custom">
+                    📄 Professional Evaluation
+                </div>
+                <div class="card-body-custom">
+                    {% if total_marks != "N/A" %}
+                    <div class="score-badge">
+                        Total Marks: {{ total_marks }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Render Markdown-like content safely? 
+                         Since we don't have a markdown filter installed, we'll use simple pre-wrap or basic rendering.
+                         For now, let's assume raw text but styled nicely.
+                         Ideally we'd use Flask-Markdown or a JS library. 
+                         Let's use a simple <pre> styling but with sans-serif font for readability.
+                    -->
+                    <div
+                        style="font-family: 'Inter', sans-serif; white-space: pre-wrap; color: #333; line-height: 1.6;">
+                        {{ evaluation }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

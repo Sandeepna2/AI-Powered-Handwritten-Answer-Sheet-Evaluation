@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container text-center">
+
+    <div class="mt-4">
+        <h5>Bluebook Evaluator</h5>
+        <p class="text-muted">Logged in as: {{ current_user.email }}</p>
+    </div>
+
+    <div class="upload-card mx-auto" style="max-width: 800px;">
+        <h3 class="mb-4" style="color: #2c3e50; font-weight: 700;">
+            📘 Bluebook Answer Sheet Evaluator
+        </h3>
+        <p class="mb-5 text-muted">Upload a Knowledge Base PDF and Answer Sheet (PDF/Images) to evaluate answers
+            automatically.</p>
+
+        <form action="{{ url_for('main.upload_files') }}" method="POST" enctype="multipart/form-data">
+
+            <div class="mb-4 text-start">
+                <label class="form-label">📚 Knowledge Base (PDF)</label>
+                <input type="file" class="form-control" name="knowledge_base" accept=".pdf" required>
+            </div>
+
+            <div class="mb-4 text-start">
+                <label class="form-label">📝 Answer Sheet (PDF or Images)</label>
+                <input type="file" class="form-control" name="answer_sheet" accept=".pdf, .png, .jpg, .jpeg" multiple
+                    required>
+            </div>
+
+            <button type="submit" class="btn btn-primary-custom mt-3">
+                🚀 Evaluate
+            </button>
+        </form>
+    </div>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay d-none">
+        <div class="spinner"></div>
+        <div class="loading-text">Analyzing with Gemini 2.0...</div>
+        <p class="text-muted mt-2">This may take up to 20 seconds</p>
+    </div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const btn = this.querySelector('button[type="submit"]');
+            const overlay = document.getElementById('loadingOverlay');
+
+            // Show overlay
+            overlay.classList.remove('d-none');
+
+            // Disable button
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Processing...';
+        });
+    </script>
+</div>
+{% endblock %}
