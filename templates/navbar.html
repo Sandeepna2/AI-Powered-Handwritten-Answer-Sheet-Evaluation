@@ -6,13 +6,9 @@
         </a>
 
         <div class="nav-links">
-            <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
-                <i class="fa-solid fa-house"></i> Home
-            </a>
-
             {% if session.get('user_id') %}
-                <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
-                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' or request.path == '/' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i> Home
                 </a>
                 <a href="/upload-form" class="nav-link {% if request.path == '/upload-form' %}active{% endif %}">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Evaluate Sheet
@@ -21,6 +17,9 @@
                     <i class="fa-solid fa-clock-rotate-left"></i> History
                 </a>
             {% else %}
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <i class="fa-solid fa-house"></i> Home
+                </a>
                 <a href="/login" class="nav-link {% if request.path == '/login' %}active{% endif %}">
                     <i class="fa-solid fa-right-to-bracket"></i> Login
                 </a>

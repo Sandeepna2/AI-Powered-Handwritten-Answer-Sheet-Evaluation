@@ -301,7 +301,7 @@ def admin_dashboard():
 @app.route("/")
 def welcome():
     if "user_id" in session:
-        return redirect(url_for("upload_form"))
+        return redirect(url_for("dashboard"))
     return render_template("welcome.html")
 
 @app.route("/upload-form")
