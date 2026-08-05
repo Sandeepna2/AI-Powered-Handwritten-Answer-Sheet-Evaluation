@@ -1,10 +1,13 @@
 # 🎓 Bluebook Corrector — AI-Powered Handwritten Answer Sheet Evaluation System
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-success.svg?style=for-the-badge&logo=render)](https://ai-powered-handwritten-answer-sheet-52g1.onrender.com/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Framework-Flask-green.svg)](https://flask.palletsprojects.com/)
 [![Google GenAI](https://img.shields.io/badge/AI%20Engine-Google%20GenAI%20SDK-orange.svg)](https://ai.google.dev/)
 [![PyMuPDF](https://img.shields.io/badge/PDF%20Engine-PyMuPDF%20(fitz)-purple.svg)](https://pymupdf.readthedocs.io/)
 [![License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
+
+🌐 **Live Web App**: [https://ai-powered-handwritten-answer-sheet-52g1.onrender.com/](https://ai-powered-handwritten-answer-sheet-52g1.onrender.com/)
 
 **Bluebook Corrector** is a state-of-the-art web application that automates the grading of handwritten student answer sheets. Powered by **Google's official `google-genai` SDK** and **PyMuPDF**, it extracts handwritten answers, compares them against Question Paper reference content, and generates objective scores, detailed criteria breakdowns, and actionable feedback.
 
