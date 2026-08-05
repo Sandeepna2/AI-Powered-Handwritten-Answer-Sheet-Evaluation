@@ -1,93 +1,381 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>📘 Bluebook Corrector</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #eef2f7;
-            margin: 0;
-            padding: 0;
-        }
-        .main-container {
-            max-width: 1000px;
-            margin: auto;
-            padding: 40px 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .header h1 {
-            color: #2b2f80;
-            font-size: 32px;
-        }
-        .form-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            font-weight: 600;
-            display: block;
-            margin-bottom: 6px;
-        }
-        input[type="file"] {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        button {
-            background: #4f46e5;
-            color: white;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-        }
-        button:hover {
-            background: #3730a3;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
 
-{% include 'navbar.html' %}
+{% block title %}Evaluate Answer Sheet - Bluebook Corrector{% endblock %}
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-    <div>
-        <strong>Bluebook Evaluator</strong><br>
-        <small>Logged in as: {{ session.email }}</small>
+{% block content %}
+<div class="page-container" style="max-width: 900px;">
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+        <span style="background: var(--primary-light); color: var(--primary); font-weight: 600; font-size: 0.85rem; padding: 0.35rem 0.85rem; border-radius: var(--radius-full); display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> New Evaluation Session
+        </span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--dark);">Upload Answer Sheets & Reference Key</h1>
+        <p style="color: var(--text-muted); font-size: 1rem; margin-top: 0.35rem;">
+            Provide the Reference PDF knowledge base and handwritten student answer sheets (PDF or images) to generate an AI evaluation.
+        </p>
     </div>
-    <div>
-        {% if session.is_admin %}
-            <a href="/admin">Admin Panel</a> |
-        {% endif %}
-        <a href="/logout">Logout</a>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <div class="card" style="padding: 2.25rem;">
+        <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.75rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="student_name">
+                        <i class="fa-solid fa-user-graduate" style="color:var(--primary); margin-right: 0.3rem;"></i> Student Name / Roll No
+                    </label>
+                    <input type="text" name="student_name" id="student_name" class="form-control" placeholder="e.g. John Doe (Roll: 104)" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="total_marks">
+                        <i class="fa-solid fa-award" style="color:var(--success); margin-right: 0.3rem;"></i> Total Maximum Marks
+                    </label>
+                    <input type="number" name="total_marks" id="total_marks" class="form-control" value="100" min="1" max="1000" placeholder="e.g. 100 or 50" required>
+                </div>
+            </div>
+
+            <!-- Question-wise Marks Allocator Component -->
+            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <label class="form-label" style="margin-bottom: 0.1rem;">
+                            <i class="fa-solid fa-list-check" style="color:var(--accent); margin-right: 0.3rem;"></i> Question-wise Marks Allocation
+                        </label>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Allocate specific marks for each question in the Question Paper</span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <span class="badge-score high" id="marksSumBadge" style="font-size: 0.8rem;">
+                            Sum: 0 / 100 Marks
+                        </span>
+                        <button type="button" id="autoDetectBtn" class="btn btn-secondary" onclick="autoDetectQuestionsFromPDF()" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--primary-light); color: var(--primary);" title="Auto-extract question numbers and marks from PDF">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Detect Questions
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="addQuestionRow()" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+                            <i class="fa-solid fa-plus"></i> Add Question
+                        </button>
+                    </div>
+                </div>
+
+                <div id="questionsContainer" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                    <div id="emptyStateHelp" style="text-align: center; padding: 1.5rem 1rem; color: var(--text-muted); font-size: 0.875rem; background: white; border: 1px dashed var(--border-color); border-radius: var(--radius-sm);">
+                        <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--primary); margin-right:0.3rem;"></i> Upload a Question Paper PDF below to auto-detect questions & allocated marks, or click <strong>"+ Add Question"</strong> to enter manually.
+                    </div>
+                </div>
+            </div>
+            
+            <input type="hidden" name="marks_breakdown" id="marks_breakdown_hidden">
+
+            <!-- Question Paper Dropzone -->
+            <div class="form-group" style="margin-bottom: 1.75rem;">
+                <label class="form-label">
+                    <i class="fa-solid fa-file-contract" style="color:var(--secondary); margin-right: 0.3rem;"></i> Question Paper (PDF)
+                </label>
+                <div class="dropzone" id="kbDropzone">
+                    <input type="file" name="knowledge_base" id="knowledge_base" accept="application/pdf" required style="display: none;">
+                    <div class="dropzone-icon" style="color: var(--secondary);"><i class="fa-solid fa-file-pdf"></i></div>
+                    <div class="dropzone-title">Click or Drag & Drop Question Paper PDF</div>
+                    <div class="dropzone-sub">Upload 1 Question Paper PDF document (Max 40MB)</div>
+                    <div class="file-preview-chips" id="kbChipContainer"></div>
+                </div>
+            </div>
+
+            <!-- Answer Sheet Dropzone -->
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label">
+                    <i class="fa-solid fa-file-image" style="color:var(--accent); margin-right: 0.3rem;"></i> Student Answer Sheet (PDF or Images)
+                </label>
+                <div class="dropzone" id="ansDropzone">
+                    <input type="file" name="answer_sheet" id="answer_sheet" multiple accept="application/pdf, image/png, image/jpeg, image/webp" required style="display: none;">
+                    <div class="dropzone-icon" style="color: var(--accent);"><i class="fa-solid fa-images"></i></div>
+                    <div class="dropzone-title">Click or Drag & Drop Answer Sheets</div>
+                    <div class="dropzone-sub">Accepts handwritten PDF pages or Images (PNG, JPG, WEBP). Multiple files supported.</div>
+                    <div class="file-preview-chips" id="ansChipContainer"></div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn btn-primary btn-block" style="padding: 0.9rem; font-size: 1.05rem;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Start AI Evaluation
+            </button>
+        </form>
     </div>
 </div>
 
-    <div class="main-container">
-        <div class="header">
-            <h1>📘 Bluebook Answer Sheet Evaluator</h1>
-            <p>Upload a Knowledge Base PDF and Answer Sheet (PDF/Images) to evaluate answers automatically.</p>
-        </div>
-
-        <div class="form-section">
-            <form action="/upload" method="post" enctype="multipart/form-data">
-                <label for="knowledge_base">📚 Knowledge Base (PDF)</label>
-                <input type="file" name="knowledge_base" accept="application/pdf" required>
-
-                <label for="answer_sheet">📝 Answer Sheet (PDF or Images)</label>
-                <input type="file" name="answer_sheet" multiple accept="application/pdf, image/png, image/jpeg" required>
-
-                <button type="submit">🚀 Evaluate</button>
-            </form>
+<!-- Animated Processing Modal -->
+<div class="modal-overlay" id="loadingOverlay">
+    <div class="modal-box">
+        <div class="spinner-ring"></div>
+        <h3 style="font-size: 1.4rem; color: var(--dark); margin-bottom: 0.5rem;">Evaluating Answer Sheet</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Please stay on this page while our AI engine processes your documents.</p>
+        
+        <div style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); text-align: left; font-size: 0.85rem; border: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; color: var(--primary); font-weight: 600;" id="step1">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Extracting text & rasterizing PDF pages...
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; color: var(--text-muted);" id="step2">
+                <i class="fa-regular fa-circle"></i> Analyzing handwriting with Multimodal Gemini...
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted);" id="step3">
+                <i class="fa-regular fa-circle"></i> Generating detailed rubrics & criteria feedback...
+            </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // KB Dropzone Handler
+    const kbDropzone = document.getElementById('kbDropzone');
+    const kbInput = document.getElementById('knowledge_base');
+    const kbChips = document.getElementById('kbChipContainer');
+
+    kbDropzone.addEventListener('click', () => kbInput.click());
+    kbInput.addEventListener('change', () => updateKbChips());
+
+    kbDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        kbDropzone.classList.add('dragover');
+    });
+    kbDropzone.addEventListener('dragleave', () => kbDropzone.classList.remove('dragover'));
+    kbDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        kbDropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            kbInput.files = e.dataTransfer.files;
+            updateKbChips();
+        }
+    });
+
+    function updateKbChips() {
+        kbChips.innerHTML = '';
+        if (kbInput.files.length) {
+            const file = kbInput.files[0];
+            kbChips.innerHTML = `
+                <div class="file-chip">
+                    <i class="fa-solid fa-file-pdf" style="color:var(--danger)"></i>
+                    <span>${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                </div>
+            `;
+            // Instantly auto-detect questions & marks as soon as Question Paper PDF is uploaded
+            autoDetectQuestionsFromPDF();
+        }
+    }
+
+    // Answer Sheet Dropzone Handler
+    const ansDropzone = document.getElementById('ansDropzone');
+    const ansInput = document.getElementById('answer_sheet');
+    const ansChips = document.getElementById('ansChipContainer');
+
+    ansDropzone.addEventListener('click', () => ansInput.click());
+    ansInput.addEventListener('change', () => updateAnsChips());
+
+    ansDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        ansDropzone.classList.add('dragover');
+    });
+    ansDropzone.addEventListener('dragleave', () => ansDropzone.classList.remove('dragover'));
+    ansDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        ansDropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            ansInput.files = e.dataTransfer.files;
+            updateAnsChips();
+        }
+    });
+
+    function updateAnsChips() {
+        ansChips.innerHTML = '';
+        Array.from(ansInput.files).forEach((file) => {
+            const isPdf = file.name.toLowerCase().endsWith('.pdf');
+            const icon = isPdf ? 'fa-file-pdf' : 'fa-file-image';
+            const color = isPdf ? 'var(--danger)' : 'var(--accent)';
+            ansChips.innerHTML += `
+                <div class="file-chip">
+                    <i class="fa-solid ${icon}" style="color:${color}"></i>
+                    <span>${file.name}</span>
+                </div>
+            `;
+        });
+    }
+
+    // Question Allocator Handler
+    let questionCount = 0;
+
+    function addQuestionRow(qNum = '', title = '', marks = '') {
+        const emptyState = document.getElementById('emptyStateHelp');
+        if (emptyState) emptyState.remove();
+
+        questionCount++;
+        const container = document.getElementById('questionsContainer');
+        const rowId = `q_row_${questionCount}`;
+        const labelText = qNum ? `Question ${qNum}` : `Question ${questionCount}`;
+        
+        const row = document.createElement('div');
+        row.id = rowId;
+        row.className = 'q-row';
+        row.style.cssText = 'display: grid; grid-template-columns: 110px 1fr 120px 38px; gap: 0.75rem; align-items: center; background: white; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);';
+        
+        row.innerHTML = `
+            <span style="font-weight: 700; font-size: 0.85rem; color: var(--dark);" class="q-label" data-qnum="${qNum}">${labelText}</span>
+            <input type="text" class="form-control q-title" placeholder="Description / Topic (Optional)" value="${title.replace(/"/g, '&quot;')}" oninput="updateMarksSum()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+            <input type="number" class="form-control q-marks" placeholder="Allocated Marks" value="${marks}" min="1" max="500" oninput="updateMarksSum()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+            <button type="button" onclick="removeQuestionRow('${rowId}')" style="background: transparent; color: var(--danger); border: none; cursor: pointer; padding: 0.4rem; font-size: 0.9rem;" title="Delete Question">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        `;
+        container.appendChild(row);
+        updateMarksSum();
+    }
+
+    async function autoDetectQuestionsFromPDF() {
+        const kbInput = document.getElementById('knowledge_base');
+        if (!kbInput.files.length) {
+            return;
+        }
+
+        const btn = document.getElementById('autoDetectBtn');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting...';
+
+        const formData = new FormData();
+        formData.append('knowledge_base', kbInput.files[0]);
+
+        try {
+            const resp = await fetch('/api/detect-questions', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+
+            if (resp.ok && data.questions && data.questions.length > 0) {
+                if (data.total_marks) {
+                    document.getElementById('total_marks').value = data.total_marks;
+                }
+
+                document.getElementById('questionsContainer').innerHTML = '';
+                questionCount = 0;
+
+                data.questions.forEach(q => {
+                    addQuestionRow(q.q_num, q.title, q.marks);
+                });
+
+                updateMarksSum();
+            } else {
+                console.warn('Auto-detection notice:', data.error);
+                const container = document.getElementById('questionsContainer');
+                if (!container.querySelector('.q-row')) {
+                    container.innerHTML = `
+                        <div id="emptyStateHelp" style="text-align: center; padding: 1.2rem 1rem; color: #b45309; font-size: 0.85rem; background: #fffbeb; border: 1px solid #fef3c7; border-radius: var(--radius-sm);">
+                            <i class="fa-solid fa-triangle-exclamation" style="margin-right:0.3rem;"></i> Auto-detection paused due to API quota. Click <strong>"+ Add Question"</strong> to enter manually or retry in a few seconds.
+                        </div>
+                    `;
+                }
+            }
+        } catch (err) {
+            console.error('Error detecting questions:', err);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    }
+
+    function removeQuestionRow(rowId) {
+        const row = document.getElementById(rowId);
+        if (row) {
+            row.remove();
+            reindexQuestions();
+            updateMarksSum();
+
+            const container = document.getElementById('questionsContainer');
+            if (!container.querySelector('.q-row')) {
+                container.innerHTML = `
+                    <div id="emptyStateHelp" style="text-align: center; padding: 1.5rem 1rem; color: var(--text-muted); font-size: 0.875rem; background: white; border: 1px dashed var(--border-color); border-radius: var(--radius-sm);">
+                        <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--primary); margin-right:0.3rem;"></i> Upload a Question Paper PDF below to auto-detect questions & allocated marks, or click <strong>"+ Add Question"</strong> to enter manually.
+                    </div>
+                `;
+            }
+        }
+    }
+
+    function reindexQuestions() {
+        const rows = document.querySelectorAll('#questionsContainer .q-row');
+        rows.forEach((row, index) => {
+            const numSpan = row.querySelector('.q-label');
+            const customNum = numSpan.getAttribute('data-qnum');
+            if (!customNum) {
+                numSpan.textContent = `Question ${index + 1}`;
+            }
+        });
+    }
+
+    function updateMarksSum() {
+        const totalMax = parseFloat(document.getElementById('total_marks').value) || 100;
+        const markInputs = document.querySelectorAll('.q-marks');
+        let sum = 0;
+        markInputs.forEach(input => {
+            sum += parseFloat(input.value) || 0;
+        });
+
+        const badge = document.getElementById('marksSumBadge');
+        badge.textContent = `Sum: ${sum} / ${totalMax} Marks`;
+        if (sum === totalMax && totalMax > 0) {
+            badge.className = 'badge-score high';
+        } else if (sum > 0) {
+            badge.className = 'badge-score medium';
+        } else {
+            badge.className = 'badge-score na';
+        }
+
+        // Serialize into hidden field
+        const rows = document.querySelectorAll('#questionsContainer .q-row');
+        const breakdownList = [];
+        rows.forEach((row, index) => {
+            const numSpan = row.querySelector('.q-label');
+            const qNum = numSpan.getAttribute('data-qnum') || (index + 1);
+            const title = row.querySelector('.q-title').value.trim();
+            const m = row.querySelector('.q-marks').value.trim();
+            if (m) {
+                const desc = title ? ` (${title})` : '';
+                breakdownList.push(`Q${qNum}${desc}: ${m} marks`);
+            }
+        });
+        document.getElementById('marks_breakdown_hidden').value = breakdownList.join(', ');
+    }
+
+    document.getElementById('total_marks').addEventListener('input', updateMarksSum);
+
+    // Submission Handler
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        if (!kbInput.files.length || !ansInput.files.length) {
+            e.preventDefault();
+            alert('Please select both a Question Paper PDF and at least one Answer Sheet document.');
+            return;
+        }
+
+        document.getElementById('loadingOverlay').classList.add('active');
+        document.getElementById('submitBtn').disabled = true;
+
+        setTimeout(() => {
+            const step2 = document.getElementById('step2');
+            step2.style.color = 'var(--primary)';
+            step2.style.fontWeight = '600';
+            step2.querySelector('i').className = 'fa-solid fa-circle-notch fa-spin';
+        }, 3000);
+
+        setTimeout(() => {
+            const step3 = document.getElementById('step3');
+            step3.style.color = 'var(--primary)';
+            step3.style.fontWeight = '600';
+            step3.querySelector('i').className = 'fa-solid fa-circle-notch fa-spin';
+        }, 7000);
+    });
+</script>
+{% endblock %}

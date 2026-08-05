@@ -1,37 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Welcome - Bluebook Corrector</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-</head>
-<body>
+{% extends "base.html" %}
 
-<!-- NAVBAR -->
-{% include 'navbar.html' %}
+{% block title %}Bluebook Corrector - AI-Powered Answer Sheet Evaluation{% endblock %}
 
-<div style="text-align:center;margin-top:120px;font-family:'Inter',sans-serif;">
-    <h1 style="font-size:42px;color:#2b2f80;font-weight:700;">
-        Welcome to Bluebook Corrector ✨
-    </h1>
+{% block content %}
+<div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31104b 100%); color: white; padding: 5rem 1.5rem 6rem; text-align: center; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; pointer-events: none;"></div>
+    <div style="position: absolute; bottom: -100px; left: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(14,165,233,0.2) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; pointer-events: none;"></div>
+    
+    <div style="max-width: 850px; margin: 0 auto; position: relative; z-index: 2;">
+        <span style="background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); color: #c7d2fe; font-size: 0.85rem; font-weight: 600; padding: 0.4rem 1rem; border-radius: 9999px; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Next-Gen AI Handwriting OCR & Evaluation Engine
+        </span>
+        <h1 style="font-size: 3.25rem; font-weight: 800; font-family: var(--font-heading); line-height: 1.15; color: white; margin-bottom: 1.25rem;">
+            Automate Answer Sheet Grading with <span style="background: linear-gradient(135deg, #818cf8, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Precision & Speed</span>
+        </h1>
+        <p style="font-size: 1.15rem; color: #cbd5e1; max-width: 680px; margin: 0 auto 2.5rem; line-height: 1.6;">
+            Bluebook Corrector reads handwritten answer sheets, compares student solutions against your reference answer keys, and delivers objective marks with detailed feedback.
+        </p>
 
-    <p style="font-size:18px;color:#555;margin-top:10px;">
-        AI-Powered Handwritten Answer Sheet Evaluation
-    </p>
-
-    <a href="/login"
-       style="background:#4f46e5;
-              padding:14px 26px;
-              border-radius:8px;
-              color:white;
-              text-decoration:none;
-              margin-top:30px;
-              display:inline-block;
-              font-size:16px;
-              font-weight:600;">
-        Get Started
-    </a>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/signup" class="btn btn-primary" style="padding: 0.9rem 2rem; font-size: 1.05rem;">
+                <i class="fa-solid fa-rocket"></i> Get Started Free
+            </a>
+            <a href="/login" class="btn btn-secondary" style="padding: 0.9rem 2rem; font-size: 1.05rem; background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.2);">
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In
+            </a>
+        </div>
+    </div>
 </div>
 
-</body>
-</html>
+<div class="page-container" style="margin-top: -3rem; position: relative; z-index: 3;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <div class="card" style="padding: 2rem;">
+            <div style="width: 50px; height: 50px; background: #e0f2fe; color: #0284c7; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; margin-bottom: 1.25rem;">
+                <i class="fa-solid fa-file-pen"></i>
+            </div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--dark);">Handwriting Recognition</h3>
+            <p style="color: var(--text-muted); font-size: 0.925rem;">
+                Advanced multimodal vision OCR extracts handwritten answers from single or multi-page PDFs and images with high accuracy.
+            </p>
+        </div>
+
+        <div class="card" style="padding: 2rem;">
+            <div style="width: 50px; height: 50px; background: #f3e8ff; color: #9333ea; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; margin-bottom: 1.25rem;">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--dark);">Knowledge Base Alignment</h3>
+            <p style="color: var(--text-muted); font-size: 0.925rem;">
+                Compares responses against reference text, rubrics, or solution keys to assess accuracy, completeness, and missing key points.
+            </p>
+        </div>
+
+        <div class="card" style="padding: 2rem;">
+            <div style="width: 50px; height: 50px; background: #dcfce7; color: #16a34a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; margin-bottom: 1.25rem;">
+                <i class="fa-solid fa-square-poll-vertical"></i>
+            </div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--dark);">Detailed Feedback & Reports</h3>
+            <p style="color: var(--text-muted); font-size: 0.925rem;">
+                Generates instant scores out of 10, criteria breakdowns, constructive feedback summaries, and downloadable reports.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

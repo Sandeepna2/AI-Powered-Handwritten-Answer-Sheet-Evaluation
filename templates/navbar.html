@@ -1,32 +1,48 @@
-<div class="navbar" 
-     style="background:white;
-            padding:15px 30px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            box-shadow:0 2px 8px rgba(0,0,0,0.1);
-            font-family:'Inter',sans-serif;
-            position:sticky;
-            top:0;
-            z-index:100;">
-    
-    <div style="font-size:20px;font-weight:700;color:#4f46e5;">
-        Bluebook Corrector
+<nav class="navbar">
+    <div class="navbar-inner">
+        <a href="/" class="navbar-brand">
+            <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+            <span>Bluebook Corrector</span>
+        </a>
+
+        <div class="nav-links">
+            <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                <i class="fa-solid fa-house"></i> Home
+            </a>
+
+            {% if session.get('user_id') %}
+                <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </a>
+                <a href="/upload-form" class="nav-link {% if request.path == '/upload-form' %}active{% endif %}">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Evaluate Sheet
+                </a>
+                <a href="/history" class="nav-link {% if request.path == '/history' %}active{% endif %}">
+                    <i class="fa-solid fa-clock-rotate-left"></i> History
+                </a>
+            {% else %}
+                <a href="/login" class="nav-link {% if request.path == '/login' %}active{% endif %}">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login
+                </a>
+                <a href="/signup" class="btn btn-primary" style="padding: 0.45rem 1.1rem; font-size: 0.875rem;">
+                    Sign Up
+                </a>
+            {% endif %}
+
+            {% if session.get('is_admin') %}
+                <a href="/admin" class="nav-link {% if request.path == '/admin' %}active{% endif %}" style="color:var(--accent);">
+                    <i class="fa-solid fa-user-shield"></i> Admin
+                </a>
+            {% endif %}
+
+            {% if session.get('user_id') %}
+                <div class="nav-user">
+                    <span class="user-badge"><i class="fa-solid fa-user"></i> {{ session.email.split('@')[0] }}</span>
+                    <a href="/logout" class="nav-link" style="color:var(--danger); padding:0.4rem;" title="Logout">
+                        <i class="fa-solid fa-power-off"></i>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
     </div>
-
-    <div style="display:flex;gap:20px;font-weight:600;">
-        <a href="/" style="text-decoration:none;color:#4f46e5;">Home</a>
-
-        {% if session.get('user_id') %}
-            <a href="/dashboard" style="text-decoration:none;color:#4f46e5;">Dashboard</a>
-            <a href="/logout" style="text-decoration:none;color:#ef4444;">Logout</a>
-        {% else %}
-            <a href="/login" style="text-decoration:none;color:#4f46e5;">Login</a>
-            <a href="/signup" style="text-decoration:none;color:#4f46e5;">Signup</a>
-        {% endif %}
-
-        {% if session.get('is_admin') %}
-            <a href="/admin" style="text-decoration:none;color:#4f46e5;">Admin</a>
-        {% endif %}
-    </div>
-</div>
+</nav>

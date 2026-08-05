@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluation History - Bluebook Corrector{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2rem; font-weight: 800; color: var(--dark);">Evaluation History</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+                Browse and manage all {{ total }} saved handwritten evaluation reports.
+            </p>
+        </div>
+        
+        <form action="/history" method="GET" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <div style="position: relative;">
+                <input type="text" name="q" value="{{ query if query else '' }}" class="form-control" placeholder="Search student name..." style="padding-left: 2.25rem; width: 260px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem;"></i>
+            </div>
+            <button type="submit" class="btn btn-secondary" style="padding: 0.75rem 1rem;">Search</button>
+            {% if query %}
+                <a href="/history" class="btn btn-secondary" style="padding: 0.75rem 1rem; color: var(--danger);" title="Clear Search">
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="card" style="padding: 1.75rem;">
+        {% if evaluations %}
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Score / 10</th>
+                        <th>Date Evaluated</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for eval in evaluations %}
+                    <tr>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <div style="width:38px; height:38px; border-radius:50%; background:var(--primary-light); color:var(--primary); font-weight:700; display:flex; align-items:center; justify-content:center; font-size:0.9rem;">
+                                    {{ eval.student_name[0]|upper }}
+                                </div>
+                                <span style="font-weight:600; color:var(--dark);">{{ eval.student_name }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% set score_num = eval.marks.split('/')[0]|float if eval.marks != 'N/A' else -1 %}
+                            <span class="badge-score {% if score_num >= 7 %}high{% elif score_num >= 4 %}medium{% elif score_num >= 0 %}low{% else %}na{% endif %}">
+                                <i class="fa-solid fa-award"></i> {{ eval.marks }}
+                            </span>
+                        </td>
+                        <td style="color:var(--text-muted); font-size:0.875rem;">
+                            <i class="fa-regular fa-clock" style="margin-right:0.3rem;"></i> {{ eval.created_at }}
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display:inline-flex; gap:0.4rem;">
+                                <a href="/evaluation/{{ eval.id }}" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" title="View Evaluation Workspace">
+                                    <i class="fa-solid fa-eye"></i> View
+                                </a>
+                                <a href="/download/{{ eval.id }}" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" title="Download HTML Report">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                                <form action="/evaluation/{{ eval.id }}/delete" method="POST" style="display:inline;" onsubmit="return confirm('Delete this evaluation report permanently?');">
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.35rem 0.65rem; font-size: 0.8rem;" title="Delete Record">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 2rem;">
+            <a href="?page={{ page - 1 }}{% if query %}&q={{ query }}{% endif %}" class="btn btn-secondary {% if page == 1 %}disabled{% endif %}" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">
+                <i class="fa-solid fa-chevron-left"></i> Previous
+            </a>
+            
+            <span style="font-size: 0.875rem; color: var(--text-muted); font-weight: 500; margin: 0 0.5rem;">
+                Page {{ page }} of {{ total_pages }}
+            </span>
+
+            <a href="?page={{ page + 1 }}{% if query %}&q={{ query }}{% endif %}" class="btn btn-secondary {% if page == total_pages %}disabled{% endif %}" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">
+                Next <i class="fa-solid fa-chevron-right"></i>
+            </a>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+            <i class="fa-solid fa-folder-open" style="font-size: 3rem; color: var(--border-color); margin-bottom: 1rem;"></i>
+            <h3 style="font-size: 1.2rem; color: var(--dark); margin-bottom: 0.4rem;">No Evaluations Found</h3>
+            <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">
+                {% if query %}No records found matching "{{ query }}".{% else %}You have not saved any answer sheet evaluations yet.{% endif %}
+            </p>
+            <a href="/upload-form" class="btn btn-primary">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Start New Evaluation
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

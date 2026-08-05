@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Evaluation Workspace - Bluebook Corrector{% endblock %}
+{% block title %}Evaluation Details - {{ evaluation.student_name }}{% endblock %}
 
 {% block content %}
 <div class="page-container" style="max-width: 1440px;">
@@ -8,26 +8,28 @@
     <!-- Top Action Bar -->
     <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 1.25rem 1.75rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <div>
-            <span style="font-size: 0.825rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em;">Student Answer Sheet Evaluation</span>
+            <div style="font-size: 0.825rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em;">Evaluation Archive Details</div>
             <h1 style="font-size: 1.6rem; color: var(--dark); font-weight: 800; margin-top: 0.1rem;">
-                <i class="fa-solid fa-user-graduate" style="color:var(--primary); margin-right: 0.4rem;"></i> {{ student_name }}
+                <i class="fa-solid fa-user-graduate" style="color:var(--primary); margin-right: 0.4rem;"></i> {{ evaluation.student_name }}
             </h1>
+            <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fa-regular fa-clock"></i> Evaluated on {{ evaluation.created_at }}</span>
         </div>
 
         <div style="display: flex; align-items: center; gap: 1rem;">
-            {% set score_num = marks.split('/')[0]|float if marks != 'N/A' else -1 %}
+            {% set score_num = evaluation.marks.split('/')[0]|float if evaluation.marks != 'N/A' else -1 %}
             <div class="badge-score {% if score_num >= 7 %}high{% elif score_num >= 4 %}medium{% elif score_num >= 0 %}low{% else %}na{% endif %}" style="font-size: 1.15rem; padding: 0.5rem 1.25rem;">
-                <i class="fa-solid fa-award"></i> Score: {{ marks }}
+                <i class="fa-solid fa-award"></i> Score: {{ evaluation.marks }}
             </div>
             
-            {% if eval_id %}
-            <a href="/download/{{ eval_id }}" class="btn btn-secondary" style="padding: 0.6rem 1rem; font-size: 0.9rem;">
-                <i class="fa-solid fa-download"></i> Download Report
+            <a href="/download/{{ evaluation.id }}" class="btn btn-secondary" style="padding: 0.6rem 1rem; font-size: 0.9rem;">
+                <i class="fa-solid fa-download"></i> Download HTML Report
             </a>
-            {% endif %}
-            <a href="/upload-form" class="btn btn-primary" style="padding: 0.6rem 1rem; font-size: 0.9rem;">
-                <i class="fa-solid fa-plus"></i> New Evaluation
-            </a>
+            
+            <form action="/evaluation/{{ evaluation.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this evaluation report?');" style="margin:0;">
+                <button type="submit" class="btn btn-danger" style="padding: 0.6rem 1rem; font-size: 0.9rem;">
+                    <i class="fa-solid fa-trash-can"></i> Delete
+                </button>
+            </form>
         </div>
     </div>
 
@@ -38,7 +40,7 @@
         <div class="workspace-panel">
             <div class="panel-header">
                 <div class="panel-title">
-                    <i class="fa-solid fa-file-lines" style="color:var(--secondary)"></i> Source Documents & OCR Text
+                    <i class="fa-solid fa-file-lines" style="color:var(--secondary)"></i> Documents & Extracted OCR Text
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
                     <button class="btn btn-secondary" id="tabDocBtn" onclick="switchLeftTab('doc')" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: var(--primary-light); color: var(--primary);">
@@ -48,7 +50,7 @@
                         <i class="fa-solid fa-file-contract"></i> Question Paper
                     </button>
                     <button class="btn btn-secondary" id="tabOcrBtn" onclick="switchLeftTab('ocr')" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
-                        <i class="fa-solid fa-font"></i> OCR Text
+                        <i class="fa-solid fa-font"></i> Extracted OCR
                     </button>
                 </div>
             </div>
@@ -56,30 +58,24 @@
             <div class="panel-body">
                 <!-- Answer Sheet View -->
                 <div id="tabDocView">
-                    {% if answer_path %}
-                        <iframe src="{{ url_for('static', filename=answer_path) }}" class="doc-frame"></iframe>
-                    {% elif image_data_list %}
-                        <div style="display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 550px;">
-                            {% for img in image_data_list %}
-                                <img src="data:image/jpeg;base64,{{ img }}" alt="Answer Page {{ loop.index }}" style="width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color); shadow: var(--shadow-sm);">
-                            {% endfor %}
-                        </div>
+                    {% if evaluation.answer_path %}
+                        <iframe src="{{ url_for('static', filename=evaluation.answer_path) }}" class="doc-frame"></iframe>
                     {% else %}
                         <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
                             <i class="fa-solid fa-file-excel" style="font-size: 2.5rem; margin-bottom: 0.75rem;"></i>
-                            <p>No answer sheet preview available.</p>
+                            <p>No document preview recorded.</p>
                         </div>
                     {% endif %}
                 </div>
 
                 <!-- Knowledge Base View -->
                 <div id="tabKbView" style="display: none;">
-                    {% if kb_path %}
-                        <iframe src="{{ url_for('static', filename=kb_path) }}" class="doc-frame"></iframe>
+                    {% if evaluation.kb_path %}
+                        <iframe src="{{ url_for('static', filename=evaluation.kb_path) }}" class="doc-frame"></iframe>
                     {% else %}
                         <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
                             <i class="fa-solid fa-book-open" style="font-size: 2.5rem; margin-bottom: 0.75rem;"></i>
-                            <p>No knowledge base PDF provided.</p>
+                            <p>No knowledge base document recorded.</p>
                         </div>
                     {% endif %}
                 </div>
@@ -87,12 +83,12 @@
                 <!-- Extracted OCR View -->
                 <div id="tabOcrView" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">OCR Extracted Text from Handwriting</span>
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Handwriting OCR Text</span>
                         <button class="btn btn-secondary" onclick="copyOcrText()" style="padding: 0.25rem 0.65rem; font-size: 0.775rem;">
                             <i class="fa-regular fa-copy"></i> Copy Text
                         </button>
                     </div>
-                    <textarea class="ocr-textarea" id="ocrTextArea" readonly>{{ extracted_text }}</textarea>
+                    <textarea class="ocr-textarea" id="ocrTextArea" readonly>{{ evaluation.extracted_text }}</textarea>
                 </div>
             </div>
         </div>
@@ -101,13 +97,13 @@
         <div class="workspace-panel">
             <div class="panel-header">
                 <div class="panel-title">
-                    <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent)"></i> AI Evaluation & Rubric Feedback
+                    <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent)"></i> Saved Evaluation Feedback
                 </div>
             </div>
 
             <div class="panel-body">
                 <div class="eval-content" id="evalTextContainer">
-                    {{ evaluation|safe }}
+                    {{ evaluation.evaluation_text|safe }}
                 </div>
             </div>
         </div>
